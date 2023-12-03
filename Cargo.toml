@@ -4,10 +4,19 @@ version = "0.0.1"
 
 [[bin]]
 name = "choc1a"
-path = "2023/choc1b.rs"
+path = "2023/1/choc1a.rs"
 
 [[bin]]
 name = "choc1b"
-path = "2023/choc1b.rs"
+path = "2023/1/choc1b.rs"
+
+[[bin]]
+name = "choc2a"
+path = "2023/2/choc2a.rs"
+
+[[bin]]
+name = "choc2b"
+path = "2023/2/choc2b.rs"
+
 
 [dependencies]
