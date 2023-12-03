@@ -1,0 +1,13 @@
+[package]
+name = "aoc"
+version = "0.0.1"
+
+[[bin]]
+name = "choc1a"
+path = "2023/choc1b.rs"
+
+[[bin]]
+name = "choc1b"
+path = "2023/choc1b.rs"
+
+[dependencies]
