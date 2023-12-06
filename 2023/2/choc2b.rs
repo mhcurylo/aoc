@@ -43,7 +43,7 @@ fn parse_first_num(s: &str) -> i32 {
 }
 
 fn parse_bag(line: &str) -> Bag {
-    let tokens = line.split(",");
+    let tokens = line.split(',');
     let red: Vec<i32> = tokens
         .clone()
         .filter(|x| x.contains("red"))
@@ -69,7 +69,7 @@ fn parse_bag(line: &str) -> Bag {
 
 fn parse_line(line: &str) -> Game {
     let (_, sets) = line.split_once(':').expect(line);
-    let bags: Vec<Bag> = sets.split(";").map(parse_bag).collect();
+    let bags: Vec<Bag> = sets.split(';').map(parse_bag).collect();
 
     Game { plays: bags }
 }
