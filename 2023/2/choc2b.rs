@@ -1,70 +1,89 @@
+use std::cmp::max;
 use std::fs;
 
-fn numbers(str: String) -> Vec<char> {
-    let chars = str.chars();
+#[derive(Debug)]
+struct Bag {
+    blue: i32,
+    red: i32,
+    green: i32,
+}
 
-    chars
-        .enumerate()
-        .flat_map(|(i, c)| {
-            let (_, s) = str.split_at(i);
+#[derive(Debug)]
+struct Game {
+    plays: Vec<Bag>,
+}
 
-            println!("{}", s);
-            match s {
-                _ if c.is_ascii_digit() => Some(c),
-                s if s.starts_with("one") => Some('1'),
-                s if s.starts_with("two") => Some('2'),
-                s if s.starts_with("three") => Some('3'),
-                s if s.starts_with("four") => Some('4'),
-                s if s.starts_with("five") => Some('5'),
-                s if s.starts_with("six") => Some('6'),
-                s if s.starts_with("seven") => Some('7'),
-                s if s.starts_with("eight") => Some('8'),
-                s if s.starts_with("nine") => Some('9'),
-                s if s.starts_with("zero") => Some('0'),
-                _ => None,
-            }
-        })
-        .collect()
+fn min_bag(bag_one: Bag, bag_two: &Bag) -> Bag {
+    Bag {
+        blue: max(bag_one.blue, bag_two.blue),
+        red: max(bag_one.red, bag_two.red),
+        green: max(bag_one.green, bag_two.green),
+    }
+}
+
+fn power_of_min_bag(game: Game) -> i32 {
+    let bag = game.plays.iter().fold(
+        Bag {
+            red: 0,
+            blue: 0,
+            green: 0,
+        },
+        min_bag,
+    );
+
+    bag.red * bag.green * bag.blue
+}
+
+fn parse_first_num(s: &str) -> i32 {
+    s.chars()
+        .filter(|c| c.is_ascii_digit())
+        .collect::<String>()
+        .parse()
+        .expect("BOOM FIRST NUM")
+}
+
+fn parse_bag(line: &str) -> Bag {
+    let tokens = line.split(",");
+    let red: Vec<i32> = tokens
+        .clone()
+        .filter(|x| x.contains("red"))
+        .map(parse_first_num)
+        .collect();
+    let green: Vec<i32> = tokens
+        .clone()
+        .filter(|x| x.contains("green"))
+        .map(parse_first_num)
+        .collect();
+    let blue: Vec<i32> = tokens
+        .clone()
+        .filter(|x| x.contains("blue"))
+        .map(parse_first_num)
+        .collect();
+
+    Bag {
+        blue: *blue.first().unwrap_or(&0),
+        red: *red.first().unwrap_or(&0),
+        green: *green.first().unwrap_or(&0),
+    }
+}
+
+fn parse_line(line: &str) -> Game {
+    let (_, sets) = line.split_once(':').expect(line);
+    let bags: Vec<Bag> = sets.split(";").map(parse_bag).collect();
+
+    Game { plays: bags }
 }
 
 fn solve(file_name: &str) -> i32 {
     let text = fs::read_to_string(file_name).expect("Was not able to read the file");
 
-    text.lines()
-        .map(|x| x.to_string())
-        .map(numbers)
-        .map(|x| {
-            let mut iter = x.iter();
-            let first = iter.next().expect("no first value!");
-            let second = iter.next_back().unwrap_or(first);
-
-            [*first, *second]
-                .iter()
-                .collect::<String>()
-                .parse::<i32>()
-                .expect("no way it is a mistake")
-        })
-        .sum()
-    /*
-        text.lines()
-            .map(|mut l| {
-                let first = l.next().expect("first digit not found");
-                let last = l.next_back().unwrap_or(first);
-
-                [first, last]
-                    .iter()
-                    .collect::<String>()
-                    .parse::<i32>()
-                    .unwrap()
-            })
-            .sum()
-    */
+    text.lines().map(parse_line).map(power_of_min_bag).sum()
 }
 
 fn main() {
-    let test = solve("./2023/1/test.txt");
-    let input = solve("./2023/1/input.txt");
+    let test = solve("./2023/2/test.txt");
+    let input = solve("./2023/2/input.txt");
 
-    println!("Test: {}", test);
-    println!("Input: {}", input);
+    println!("Test: {:?}", test);
+    println!("Input: {:?}", input);
 }

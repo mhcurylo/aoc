@@ -18,6 +18,15 @@ path = "2023/2/choc2a.rs"
 name = "choc2b"
 path = "2023/2/choc2b.rs"
 
+[[bin]]
+name = "choc3a"
+path = "2023/3/choc3a.rs"
+
+
+[[bin]]
+name = "choc3b"
+path = "2023/3/choc3b.rs"
+
 
 [dependencies]
 combine = "4.6.6"
