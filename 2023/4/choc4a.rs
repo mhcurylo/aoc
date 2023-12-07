@@ -37,7 +37,7 @@ fn card_points(card: Card) -> i64 {
     } else if wins.is_empty() {
         0
     } else {
-        (2 as i64).pow(wins.len() as u32 - 1)
+        2_i64.pow(wins.len() as u32 - 1)
     }
 }
 

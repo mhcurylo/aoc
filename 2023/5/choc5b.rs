@@ -35,8 +35,7 @@ fn get_from_range(v: usize, rs: &RangeMap) -> usize {
 }
 
 fn is_in_range(v: usize, rs: &RangeMap) -> bool {
-    let in_range = v >= rs.source && v < (rs.source + rs.range);
-    in_range
+    v >= rs.source && v < (rs.source + rs.range)
 }
 
 fn get_from_ranges(v: usize, rs: &[RangeMap]) -> usize {
@@ -46,7 +45,7 @@ fn get_from_ranges(v: usize, rs: &[RangeMap]) -> usize {
         .unwrap_or(v)
 }
 
-fn get_from_subsequent_ranges(v: usize, rss: &Vec<Vec<RangeMap>>) -> usize {
+fn get_from_subsequent_ranges(v: usize, rss: &[Vec<RangeMap>]) -> usize {
     rss.iter().fold(v, |acc, e| get_from_ranges(acc, e))
 }
 
@@ -54,8 +53,8 @@ fn expand_seeds(seeds: &[usize]) -> Vec<usize> {
     seeds
         .chunks(2)
         .flat_map(|ab| std::ops::Range {
-            start: ab[1],
-            end: ab[0],
+            start: ab[0],
+            end: ab[0] + ab[1],
         })
         .collect::<Vec<usize>>()
 }
@@ -83,6 +82,7 @@ fn solve(file_name: &str) -> usize {
 
     let s = expand_seeds(&seeds);
 
+    println!("{}", s.len());
     s.iter()
         .map(|s| get_from_subsequent_ranges(*s, &maps))
         .min()
