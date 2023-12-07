@@ -44,6 +44,14 @@ path = "2023/5/choc5a.rs"
 name = "choc5b"
 path = "2023/5/choc5b.rs"
 
+[[bin]]
+name = "choc6a"
+path = "2023/6/choc6a.rs"
+
+[[bin]]
+name = "choc6b"
+path = "2023/6/choc6b.rs"
+
 
 [dependencies]
 combine = "4.6.6"

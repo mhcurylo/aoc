@@ -47,7 +47,7 @@ fn get_from_ranges(v: usize, rs: &[RangeMap]) -> usize {
         .unwrap_or(v)
 }
 
-fn get_from_subsequent_ranges(v: usize, rss: &Vec<Vec<RangeMap>>) -> usize {
+fn get_from_subsequent_ranges(v: usize, rss: &[Vec<RangeMap>]) -> usize {
     rss.iter().fold(v, |acc, e| get_from_ranges(acc, e))
 }
 
