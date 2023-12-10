@@ -79,6 +79,7 @@ fn get_hand_type(hv: HandValue) -> HandType {
     let just_counts: Vec<usize> = counts.iter().map(|(c, _)| *c).collect();
 
     let joker_count: usize = hv.iter().filter(|c| **c == JOKER).count();
+
     let largest_count: usize = *just_counts.first().expect("no way there is no cards");
     let second_count: usize = *just_counts.get(1).unwrap_or(&0);
 
