@@ -3,7 +3,7 @@ use std::fs;
 
 use std::collections::HashMap;
 
-//use microbench::Options;
+use microbench::Options;
 
 type Turns = Vec<bool>;
 
@@ -39,6 +39,8 @@ struct Dod {
     is_end: [bool; 1024],
     starting: Vec<u16>,
 }
+
+type TurnsDod<'a> = Vec<&'a [u16; 1024]>;
 
 const LARGEST: u16 = u16::MAX;
 
@@ -82,7 +84,6 @@ fn into_dod(loc: &LocationMap) -> Dod {
     }
 }
 
-/*
 fn travel(location_map: &LocationMap, turns: &Turns) -> usize {
     let mut turn: usize = 0;
     let mut locations: Vec<&String> = location_map
@@ -114,17 +115,15 @@ fn travel(location_map: &LocationMap, turns: &Turns) -> usize {
 
     turn
 }
-*/
-fn travel_dod(turns: &Turns, dod: &Dod) -> usize {
-    let left = dod.left;
-    let right = dod.right;
+
+fn travel_dod(turns: &TurnsDod, dod: &Dod) -> usize {
     let is_end = dod.is_end;
     let mut current = dod.starting.clone();
     let mut turn: usize = 0;
     let turn_len = turns.len();
 
     while !current.iter().all(|i| is_end[*i as usize]) {
-        let next_source = if turns[turn % turn_len] { left } else { right };
+        let next_source = turns.get(turn % turn_len).expect("OH NO");
 
         current = current.iter().map(|l| next_source[*l as usize]).collect();
         turn += 1;
@@ -148,18 +147,23 @@ fn solve(file_name: &str) -> usize {
         .map(parse_location)
         .collect::<LocationMap>();
 
-    //let options = Options::default();
-    //microbench::bench(&options, "iterative_32", || travel(&graph, &turns));
+    let options = Options::default();
+    microbench::bench(&options, "iterative_32", || travel(&graph, &turns));
 
     let dod: Dod = into_dod(&graph);
-    //microbench::bench(&options, "iterative_32", || travel_dod(&turns, &dod));
-    travel_dod(&turns, &dod)
+    let opt_turns: Vec<&[u16; 1024]> = turns
+        .iter()
+        .map(|t| if *t { &dod.left } else { &dod.right })
+        .collect();
+
+    microbench::bench(&options, "iterative_32", || travel_dod(&opt_turns, &dod));
+    travel_dod(&opt_turns, &dod)
 }
 
 fn main() {
     let test = solve("./2023/8/test_b.txt");
-    let input = solve("./2023/8/input.txt");
+    //   let input = solve("./2023/8/input.txt");
 
     println!("Test: {}", test);
-    println!("Input: {}", input);
+    //  println!("Input: {}", input);
 }
