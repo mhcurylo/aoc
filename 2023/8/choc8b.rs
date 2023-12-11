@@ -1,17 +1,13 @@
-extern crate combine;
+extern crate microbench;
 use std::fs;
 
 use std::collections::HashMap;
 
+//use microbench::Options;
+
 type Turns = Vec<bool>;
 
-type LocationMap = {
-    left: Vec<u32>
-    right:  Vec<u32>
-    position: Vec<u32>
-}
-
-HashMap<String, (String, String)>;
+type LocationMap = HashMap<String, (String, String)>;
 
 fn parse_turns(str: &str) -> Turns {
     str.chars().map(|x| x == 'L').collect()
@@ -36,14 +32,63 @@ fn parse_location(str: &str) -> (String, (String, String)) {
     )
 }
 
+#[derive(Debug)]
+struct Dod {
+    left: [u16; 1024],
+    right: [u16; 1024],
+    is_end: [bool; 1024],
+    starting: Vec<u16>,
+}
+
+const LARGEST: u16 = u16::MAX;
+
+fn into_dod(loc: &LocationMap) -> Dod {
+    let mut left: [u16; 1024] = [LARGEST; 1024];
+    let mut right: [u16; 1024] = [LARGEST; 1024];
+    let mut is_end: [bool; 1024] = [false; 1024];
+    let indexing: HashMap<&String, u16> =
+        loc.keys().enumerate().map(|(i, k)| (k, i as u16)).collect();
+    let mut starting: Vec<u16> = Vec::new();
+
+    for (loc, (to_left, to_right)) in loc.iter() {
+        let index_loc = *indexing.get(loc).expect("Your loc index is wrong");
+        let index_to_left = *indexing.get(to_left).expect("Your left index is wrong");
+        let index_to_right = *indexing.get(to_right).expect("Your right index is wrong");
+
+        left[index_loc as usize] = index_to_left;
+        right[index_loc as usize] = index_to_right;
+        is_end[index_loc as usize] = loc.as_bytes().get(2) == Some(&('Z' as u8));
+        if loc.as_bytes().get(2) == Some(&('A' as u8)) {
+            starting.push(index_loc)
+        }
+
+        println!(
+            "{:? } - {:?} - left {:?} - {:?} right {:?} - {:?} e {:?}",
+            loc,
+            index_loc,
+            to_left,
+            index_to_left,
+            to_right,
+            index_to_right,
+            is_end[index_loc as usize],
+        );
+    }
+
+    Dod {
+        left,
+        right,
+        is_end,
+        starting,
+    }
+}
+
+/*
 fn travel(location_map: &LocationMap, turns: &Turns) -> usize {
     let mut turn: usize = 0;
     let mut locations: Vec<&String> = location_map
         .keys()
         .filter(|c| c.as_bytes().get(2) == Some(&('A' as u8)))
         .collect();
-
-    println!("{:?}", locations);
 
     while !locations
         .iter()
@@ -65,10 +110,24 @@ fn travel(location_map: &LocationMap, turns: &Turns) -> usize {
             .collect();
 
         turn += 1;
+    }
 
-        if turn % 10000000 == 0 {
-            println!(":{} .... :{:?}", turn, locations);
-        };
+    turn
+}
+*/
+fn travel_dod(turns: &Turns, dod: &Dod) -> usize {
+    let left = dod.left;
+    let right = dod.right;
+    let is_end = dod.is_end;
+    let mut current = dod.starting.clone();
+    let mut turn: usize = 0;
+    let turn_len = turns.len();
+
+    while !current.iter().all(|i| is_end[*i as usize]) {
+        let next_source = if turns[turn % turn_len] { left } else { right };
+
+        current = current.iter().map(|l| next_source[*l as usize]).collect();
+        turn += 1;
     }
 
     turn
@@ -89,7 +148,12 @@ fn solve(file_name: &str) -> usize {
         .map(parse_location)
         .collect::<LocationMap>();
 
-    travel(&graph, &turns)
+    //let options = Options::default();
+    //microbench::bench(&options, "iterative_32", || travel(&graph, &turns));
+
+    let dod: Dod = into_dod(&graph);
+    //microbench::bench(&options, "iterative_32", || travel_dod(&turns, &dod));
+    travel_dod(&turns, &dod)
 }
 
 fn main() {

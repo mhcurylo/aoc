@@ -72,3 +72,4 @@ path = "2023/8/choc8b.rs"
 
 [dependencies]
 combine = "4.6.6"
+microbench = "0.5.0"
