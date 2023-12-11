@@ -64,6 +64,7 @@ fn into_dod(loc: &LocationMap) -> Dod {
             starting.push(index_loc)
         }
 
+        /*
         println!(
             "{:? } - {:?} - left {:?} - {:?} right {:?} - {:?} e {:?}",
             loc,
@@ -74,6 +75,7 @@ fn into_dod(loc: &LocationMap) -> Dod {
             index_to_right,
             is_end[index_loc as usize],
         );
+        */
     }
 
     Dod {
@@ -132,7 +134,7 @@ fn travel_dod(turns: &TurnsDod, dod: &Dod) -> usize {
     turn
 }
 
-fn solve(file_name: &str) -> usize {
+fn solve(file_name: &str, bench: bool) -> usize {
     let file_contents = fs::read_to_string(file_name).expect("Was not able to read the file");
 
     let turns: Turns = file_contents
@@ -148,7 +150,6 @@ fn solve(file_name: &str) -> usize {
         .collect::<LocationMap>();
 
     let options = Options::default();
-    microbench::bench(&options, "iterative_32", || travel(&graph, &turns));
 
     let dod: Dod = into_dod(&graph);
     let opt_turns: Vec<&[u16; 1024]> = turns
@@ -156,14 +157,17 @@ fn solve(file_name: &str) -> usize {
         .map(|t| if *t { &dod.left } else { &dod.right })
         .collect();
 
-    microbench::bench(&options, "iterative_32", || travel_dod(&opt_turns, &dod));
+    if bench {
+        microbench::bench(&options, "iterative_32", || travel(&graph, &turns));
+        microbench::bench(&options, "iterative_32", || travel_dod(&opt_turns, &dod));
+    }
     travel_dod(&opt_turns, &dod)
 }
 
 fn main() {
-    let test = solve("./2023/8/test_b.txt");
-    //   let input = solve("./2023/8/input.txt");
-
+    let test = solve("./2023/8/test_b.txt", true);
     println!("Test: {}", test);
-    //  println!("Input: {}", input);
+
+    let input = solve("./2023/8/input.txt", false);
+    println!("Input: {}", input);
 }
